@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qwen2VL AutoDrive Post-Training</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --ink: #18212f;
+      --muted: #5c6675;
+      --line: #d9dee7;
+      --blue: #2454a6;
+      --green: #157a62;
+      --red: #a84242;
+      --amber: #8a6424;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.6;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 22px 56px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      font-weight: 760;
+      font-size: 18px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 14px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+      gap: 34px;
+      padding: 42px 0 36px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 42px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 17px;
+      max-width: 720px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 20px 0 0;
+    }
+
+    .tag {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-size: 13px;
+      color: #384456;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .button.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .diagram {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .diagram svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    section {
+      padding: 24px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 25px;
+      letter-spacing: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 118px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .metric .value {
+      font-size: 30px;
+      line-height: 1.15;
+      font-weight: 760;
+    }
+
+    .metric .note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #eef1f6;
+      font-size: 13px;
+      color: #364153;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .best {
+      color: var(--green);
+      font-weight: 760;
+    }
+
+    .weak {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin: 7px 0;
+    }
+
+    code {
+      background: #edf1f6;
+      border: 1px solid #dce2eb;
+      border-radius: 6px;
+      padding: 2px 5px;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.92em;
+    }
+
+    .footer {
+      color: var(--muted);
+      font-size: 13px;
+      padding-top: 24px;
+    }
+
+    @media (max-width: 920px) {
+      .hero,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        padding: 20px 14px 42px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">Qwen2VL AutoDrive</div>
+      <nav class="nav" aria-label="Project navigation">
+        <a href="#results">结果</a>
+        <a href="#pipeline">流程</a>
+        <a href="#files">文件</a>
+        <a href="#demo">Demo</a>
+      </nav>
+    </header>
+
+    <section class="hero" aria-label="Project summary">
+      <div>
+        <h1>基于 Qwen2.5-VL 的自动驾驶场景理解后训练系统</h1>
+        <p class="subtitle">
+          面向 DriveLM / nuScenes 多视角驾驶问答任务，构建 LoRA-SFT、DPO、ORPO、GSPO-style 消融和严格无泄漏评测 pipeline，最终选择 SFT-&gt;ORPO 作为主模型。
+        </p>
+        <div class="actions">
+          <a class="button primary" href="README.md">README</a>
+          <a class="button" href="docs/final_results_20260616.md">Final Results</a>
+          <a class="button" href="docs/ablation_results.md">Ablation</a>
+          <a class="button" href="results/strict_scene_3000_leaderboard.md">Leaderboard</a>
+        </div>
+        <div class="tags">
+          <span class="tag">Qwen2.5-VL-3B</span>
+          <span class="tag">LoRA-SFT</span>
+          <span class="tag">ORPO</span>
+          <span class="tag">DriveLM</span>
+          <span class="tag">nuScenes</span>
+          <span class="tag">Strict No-Leak Eval</span>
+        </div>
+      </div>
+
+      <div class="diagram" aria-label="Post-training pipeline diagram">
+        <svg viewBox="0 0 680 360" role="img">
+          <rect x="16" y="18" width="648" height="324" rx="8" fill="#f7f8fa" stroke="#d9dee7" />
+          <text x="36" y="52" font-size="22" font-weight="700" fill="#18212f">Pipeline</text>
+          <g font-size="15" font-weight="650">
+            <rect x="36" y="84" width="120" height="58" rx="8" fill="#ffffff" stroke="#b9c3d1" />
+            <text x="62" y="118" fill="#18212f">DriveLM</text>
+            <rect x="196" y="84" width="120" height="58" rx="8" fill="#ffffff" stroke="#b9c3d1" />
+            <text x="223" y="118" fill="#18212f">LoRA-SFT</text>
+            <rect x="356" y="84" width="120" height="58" rx="8" fill="#ffffff" stroke="#b9c3d1" />
+            <text x="391" y="108" fill="#18212f">ORPO</text>
+            <text x="383" y="128" fill="#157a62">Best</text>
+            <rect x="516" y="84" width="120" height="58" rx="8" fill="#ffffff" stroke="#b9c3d1" />
+            <text x="544" y="118" fill="#18212f">Official</text>
+          </g>
+          <g stroke="#2454a6" stroke-width="3" fill="none" marker-end="url(#arrow)">
+            <path d="M156 113 H196" />
+            <path d="M316 113 H356" />
+            <path d="M476 113 H516" />
+          </g>
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#2454a6" />
+            </marker>
+          </defs>
+          <g font-size="14">
+            <rect x="72" y="204" width="152" height="72" rx="8" fill="#ffffff" stroke="#d9dee7" />
+            <text x="96" y="232" fill="#5c6675">Strict Eval</text>
+            <text x="96" y="258" font-size="23" font-weight="760" fill="#18212f">3000 QA</text>
+            <rect x="264" y="204" width="152" height="72" rx="8" fill="#ffffff" stroke="#d9dee7" />
+            <text x="288" y="232" fill="#5c6675">ORPO Token-F1</text>
+            <text x="288" y="258" font-size="23" font-weight="760" fill="#157a62">0.647</text>
+            <rect x="456" y="204" width="152" height="72" rx="8" fill="#ffffff" stroke="#d9dee7" />
+            <text x="480" y="232" fill="#5c6675">Official Output</text>
+            <text x="480" y="258" font-size="23" font-weight="760" fill="#18212f">15480</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section id="results">
+      <h2>最终评测结果</h2>
+      <div class="grid">
+        <div class="metric">
+          <div class="label">Best Model</div>
+          <div class="value">ORPO</div>
+          <div class="note">SFT-&gt;ORPO 主模型</div>
+        </div>
+        <div class="metric">
+          <div class="label">Token-F1</div>
+          <div class="value">0.647</div>
+          <div class="note">95% CI [0.632, 0.660]</div>
+        </div>
+        <div class="metric">
+          <div class="label">Exact Match</div>
+          <div class="value">0.471</div>
+          <div class="note">Base 为 0.138</div>
+        </div>
+        <div class="metric">
+          <div class="label">F1&gt;=0.5</div>
+          <div class="value">0.675</div>
+          <div class="note">Base 为 0.160</div>
+        </div>
+      </div>
+
+      <table aria-label="Evaluation leaderboard">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>N</th>
+            <th>Exact</th>
+            <th>Token-F1</th>
+            <th>95% CI</th>
+            <th>F1&gt;=0.5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="best">SFT-&gt;ORPO</td>
+            <td>3000</td>
+            <td>0.471</td>
+            <td>0.647</td>
+            <td>[0.632, 0.660]</td>
+            <td>0.675</td>
+          </tr>
+          <tr>
+            <td>SFT-&gt;GSPO-style</td>
+            <td>3000</td>
+            <td>0.463</td>
+            <td>0.640</td>
+            <td>[0.626, 0.654]</td>
+            <td>0.666</td>
+          </tr>
+          <tr>
+            <td>SFT</td>
+            <td>3000</td>
+            <td>0.460</td>
+            <td>0.637</td>
+            <td>[0.623, 0.651]</td>
+            <td>0.664</td>
+          </tr>
+          <tr>
+            <td class="weak">SFT-&gt;DPO</td>
+            <td>3000</td>
+            <td>0.382</td>
+            <td>0.552</td>
+            <td>[0.537, 0.567]</td>
+            <td>0.553</td>
+          </tr>
+          <tr>
+            <td>Base</td>
+            <td>3000</td>
+            <td>0.138</td>
+            <td>0.210</td>
+            <td>[0.198, 0.221]</td>
+            <td>0.160</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="pipeline">
+      <h2>训练与评测流程</h2>
+      <div class="two-col">
+        <div class="panel">
+          <h3>后训练主线</h3>
+          <ul>
+            <li>解析 DriveLM-v1.1 和 nuScenes 多视角图像。</li>
+            <li>构建 3,000 条 SFT 训练样本和 500 条验证样本。</li>
+            <li>使用 LoRA rank 16 微调 Qwen2.5-VL-3B。</li>
+            <li>从同一 SFT 起点对比 DPO、ORPO、GSPO-style。</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>评测审计</h3>
+          <ul>
+            <li>构建 3,000 条 scene/frame/image no-leak 评测集。</li>
+            <li>使用 Token-F1、Exact、F1&gt;=0.5 和 bootstrap CI。</li>
+            <li>保留官方验证集 15,480 条推理输出。</li>
+            <li>明确区分领域格式适配收益和视觉理解增益。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="files">
+      <h2>关键文件</h2>
+      <div class="two-col">
+        <div class="panel">
+          <h3>代码入口</h3>
+          <ul>
+            <li><code>src/data/build_drivelm_swift.py</code></li>
+            <li><code>src/train/build_preference_pairs.py</code></li>
+            <li><code>src/eval/run_qwen_heldout_eval.py</code></li>
+            <li><code>src/eval/run_drivelm_official_infer.py</code></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>结果文件</h3>
+          <ul>
+            <li><code>docs/final_results_20260616.md</code></li>
+            <li><code>docs/ablation_results.md</code></li>
+            <li><code>results/strict_scene_3000_metrics.csv</code></li>
+            <li><code>results/official_submission_summary.json</code></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="demo">
+      <h2>服务化 Demo</h2>
+      <div class="panel">
+        <p>
+          项目主线是 VLM 后训练；同时保留云端 FastAPI、YOLOv8n 事件触发和 ORPO-VLM 关键帧分析代码，用于演示真实道路视频片段上的轻量系统闭环。
+        </p>
+        <ul>
+          <li>YOLOv8n 平均检测延迟约 15.54 ms/frame。</li>
+          <li>CV 处理速度约 44.95 FPS。</li>
+          <li>ORPO-VLM 单关键帧分析约 4.4 s。</li>
+          <li>VLM Demo 峰值显存约 8.3 GB。</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="footer">
+      References:
+      <a href="https://github.com/QwenLM/Qwen2.5-VL">Qwen2.5-VL</a>,
+      <a href="https://github.com/OpenDriveLab/DriveLM">DriveLM</a>,
+      <a href="https://www.nuscenes.org/">nuScenes</a>.
+    </div>
+  </main>
+</body>
+</html>

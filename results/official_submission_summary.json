@@ -1,0 +1,9 @@
+{
+  "team": "NUECS",
+  "method": "AutoDrive-Qwen2.5VL-ORPO",
+  "hf_repo": "Xuran188/AutoDrive-Qwen2.5VL-ORPO",
+  "official_val_predictions": 15480,
+  "official_space": "https://huggingface.co/spaces/AGC2024/driving-with-language-official",
+  "submission_status_note": "Submitted to the official DriveLM Hugging Face Space; public score depends on the official evaluation queue."
+}
+

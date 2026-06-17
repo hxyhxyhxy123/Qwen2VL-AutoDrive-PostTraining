@@ -1,0 +1,30 @@
+# Large datasets, model weights, and caches
+data/
+checkpoints/
+model_cache/
+hf_cache/
+*.ckpt
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Generated runtime outputs
+outputs/
+runs/
+wandb/
+logs/
+
+# Local secrets and environments
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+

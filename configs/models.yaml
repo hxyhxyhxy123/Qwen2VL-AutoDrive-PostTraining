@@ -1,0 +1,62 @@
+# Model registry for AutoDrive-VLM-RLBench.
+# `agent` maps to a class in src/models/. `hf_id` is the HuggingFace repo.
+# Set `enabled: false` to skip a model in a run without deleting its config.
+#
+# VRAM notes (bf16, single 24GB card is enough for 3B/7B inference):
+#   - 3B  ~  8-10 GB
+#   - 7B  ~ 16-18 GB
+# Use load_in_4bit: true if the card is smaller.
+
+defaults:
+  dtype: bfloat16
+  device_map: auto
+  max_new_tokens: 256
+  temperature: 0.0          # greedy for reproducible baselines
+  load_in_4bit: false
+  trust_remote_code: true
+  hf_cache: ./hf_cache
+
+models:
+  qwen2_5_vl_3b:
+    enabled: true
+    agent: qwen_vl_agent.QwenVLAgent
+    hf_id: Qwen/Qwen2.5-VL-3B-Instruct
+    display_name: Qwen2.5-VL-3B
+    min_pixels: 200704        # 256*28*28, caps image tokens for speed
+    max_pixels: 1003520       # 1280*28*28
+
+  qwen2_5_vl_7b:
+    enabled: false            # turn on once 3B baseline is verified
+    agent: qwen_vl_agent.QwenVLAgent
+    hf_id: Qwen/Qwen2.5-VL-7B-Instruct
+    display_name: Qwen2.5-VL-7B
+    min_pixels: 200704
+    max_pixels: 1003520
+
+  internvl_2_5_4b:
+    enabled: false
+    agent: internvl_agent.InternVLAgent
+    hf_id: OpenGVLab/InternVL2_5-4B
+    display_name: InternVL2.5-4B
+    max_num_tiles: 12
+
+  minicpm_v_2_6:
+    enabled: false
+    agent: minicpm_agent.MiniCPMVAgent
+    hf_id: openbmb/MiniCPM-V-2_6
+    display_name: MiniCPM-V-2.6
+
+  # Trained checkpoints are added by the P1/P2 scripts, e.g.:
+  # qwen2_5_vl_3b_lora:
+  #   enabled: false
+  #   agent: qwen_vl_agent.QwenVLAgent
+  #   hf_id: Qwen/Qwen2.5-VL-3B-Instruct
+  #   adapter: ./checkpoints/qwen3b-lora-sft
+  #   display_name: Qwen2.5-VL-3B-LoRA
+
+  # Offline pipeline test only — no weights, deterministic fake answers.
+  mock:
+    enabled: false
+    agent: mock_agent.MockAgent
+    hf_id: null
+    display_name: MockAgent

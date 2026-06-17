@@ -1,0 +1,42 @@
+# Evaluation configuration for P0.
+
+paths:
+  mini_eval: data/mini_eval.jsonl
+  hard_eval: data/hard_eval.jsonl          # optional; if absent, hard set is taken
+                                           # from difficulty=="hard" rows of mini_eval
+  predictions_dir: outputs/predictions
+  metrics_dir: outputs/metrics
+  leaderboard_dir: outputs/leaderboard
+  error_cases_dir: outputs/error_cases
+  image_root: .                            # image paths in jsonl are relative to this
+
+# The four mandatory visual-faithfulness settings (Principle #4).
+input_settings:
+  - image
+  - text_only
+  - blank_image
+  - shuffled_image
+
+inference:
+  batch_size: 1
+  max_new_tokens: 256
+  temperature: 0.0
+  seed: 1234
+
+bootstrap:
+  enabled: true
+  n_resamples: 2000        # B; use 1000 for quick iteration
+  ci: 0.95
+  seed: 1234
+
+# Answer-matching normalization (see src/eval/metrics.py).
+matching:
+  lowercase: true
+  strip_punctuation: true
+  choice_letter_match: true   # accept "B" when gt is the text of option B (and vice-versa)
+
+# Which task_types contribute to which headline metric.
+metric_groups:
+  qa_accuracy: [perception, prediction, reasoning, structured]
+  maneuver_accuracy: [maneuver]
+  macro_f1_over: [maneuver]   # classification tasks with a label_space

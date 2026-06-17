@@ -1,0 +1,50 @@
+# Prompt templates per task type.
+# Every template MUST instruct the model to return a single strict JSON object
+# so JSON Valid Rate is measurable and decoupled from answer correctness.
+#
+# Placeholders:
+#   {question}     - the question text
+#   {options}      - rendered options block (empty string if no options)
+#   {label_space}  - comma-joined allowed labels (for maneuver/classification)
+
+system: |
+  You are a careful driving-scene visual assistant. Answer ONLY from what is
+  visible in the provided image(s). If the image is missing or uninformative,
+  say so in the reasoning and give your best guess. Never invent objects that
+  are not visible. Always respond with a single JSON object and nothing else.
+
+# Shared output contract appended to every task prompt.
+json_contract: |
+  Respond with exactly one JSON object on a single line, no markdown, no code
+  fences, in this schema:
+  {{"answer": <string>, "reasoning": <short string, <= 30 words>}}
+
+tasks:
+  perception: |
+    Question (scene perception): {question}
+    {options}
+    {json_contract}
+
+  prediction: |
+    Question (future state / risk prediction): {question}
+    {options}
+    {json_contract}
+
+  maneuver: |
+    Question (ego high-level maneuver): {question}
+    The "answer" MUST be exactly one of: {label_space}.
+    {json_contract}
+
+  reasoning: |
+    Question (reasoning): {question}
+    {options}
+    Give a concise, evidence-grounded answer.
+    {json_contract}
+
+  structured: |
+    Question (structured output): {question}
+    {options}
+    {json_contract}
+
+# Rendered when options are present.
+options_header: "Options:"
