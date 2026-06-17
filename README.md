@@ -23,6 +23,14 @@
 4. **官方提交闭环**：生成 15,480 条 DriveLM 官方验证集问答推理输出，并提交到官方 Hugging Face Space。
 5. **轻量系统 Demo**：保留云端 FastAPI、YOLOv8n 事件触发与 VLM 关键帧分析代码，用于展示视频事件分析原型。
 
+## Demo Preview
+
+项目保留了视频事件触发与检测框绘制代码。下图展示了 README 用的检测可视化预览，风格对应 `src/demo/yolo_video_event_demo.py` 的事件输出：检测框、事件类型、风险等级和 VLM 关键帧分析结果。
+
+![AutoDrive event detection demo](assets/demo_detection_preview.jpg)
+
+> 说明：该图用于 GitHub 展示。原始道路图来自 Wikimedia Commons，检测框和事件面板为项目 demo 可视化风格叠加，许可证与来源见 `assets/ATTRIBUTION.md`。
+
 ## 数据构建
 
 | 数据项 | 数量 / 说明 |
@@ -66,6 +74,9 @@ docs/ablation_results.md
 Qwen2VL-AutoDrive-PostTraining/
 ├── README.md
 ├── index.html
+├── assets/
+│   ├── demo_detection_preview.jpg
+│   └── ATTRIBUTION.md
 ├── requirements.txt
 ├── configs/
 ├── docs/
@@ -153,4 +164,3 @@ DriveLM 是开放式驾驶问答任务，Token-F1 对答案格式、关键词覆
 - DriveLM Dataset: https://huggingface.co/datasets/OpenDriveLab/DriveLM
 - Official Driving-with-Language Space: https://huggingface.co/spaces/AGC2024/driving-with-language-official
 - nuScenes: https://www.nuscenes.org/
-
