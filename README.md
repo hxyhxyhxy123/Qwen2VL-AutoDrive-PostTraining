@@ -1,4 +1,4 @@
-# Qwen2VL-AutoDrive-PostTraining
+# 自动驾驶场景 VLM 后训练与视频事件分析系统
 
 基于 Qwen2.5-VL-3B 的自动驾驶场景理解与多模态后训练项目。
 
