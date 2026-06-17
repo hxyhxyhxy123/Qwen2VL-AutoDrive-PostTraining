@@ -145,15 +145,6 @@ DriveLM 是开放式驾驶问答任务，Token-F1 对答案格式、关键词覆
 
 而不是简单等价为视觉理解能力同等幅度提升。更稳妥的表述是：SFT 带来主要领域适配收益，ORPO 进一步提升偏好对齐稳定性，DPO/GSPO-style 用作对比实验帮助选择最终方法。
 
-## GitHub 上传
-
-见：
-
-```text
-docs/github_upload_guide.md
-```
-
-公开仓库只保留源码、配置、脚本、文档和精选结果。完整数据集、模型权重、cache、生成预测文件和 checkpoint 不应提交到 GitHub。
 
 ## 参考
 
