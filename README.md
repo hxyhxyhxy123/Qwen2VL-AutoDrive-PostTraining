@@ -29,8 +29,6 @@
 
 ![AutoDrive event detection demo](assets/demo_detection_preview.jpg)
 
-> 说明：该图用于 GitHub 展示。原始道路图来自 Wikimedia Commons，检测框和事件面板为项目 demo 可视化风格叠加，许可证与来源见 `assets/ATTRIBUTION.md`。
-
 ## 数据构建
 
 | 数据项 | 数量 / 说明 |
